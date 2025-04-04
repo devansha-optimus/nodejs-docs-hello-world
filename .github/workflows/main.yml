@@ -1,4 +1,4 @@
-name: Node.js CI
+name: Node.js CI/CD to Azure
 
 on:
   push:
@@ -7,16 +7,14 @@ on:
   pull_request:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
-  build:
-
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: [14, 16, 18]  # Testing across multiple Node.js versions
+        node-version: [14, 16, 18]
 
     steps:
     - name: Checkout code
@@ -26,6 +24,7 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
+        cache: 'npm'
 
     - name: Install dependencies
       run: npm install
@@ -38,5 +37,12 @@ jobs:
 
     - name: Run tests
       run: |
-        echo "No test script defined. Please add tests in package.json." # Placeholder
+        echo "No test script defined. Please add tests in package.json."
+
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: WebApp-Node-RG-Devansh-POC
+        publish-profile: ${{ secrets.AZURE_CREDENTIALS }}
+        package: .
 
